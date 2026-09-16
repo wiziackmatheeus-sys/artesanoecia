@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - Artesano & Cia</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fdfaf6; color: #333; margin: 0; padding: 0; }
+        header { background-color: #3e2723; color: white; text-align: center; padding: 1.5rem; }
+        header h1 { margin: 0; font-size: 2rem; letter-spacing: 2px; }
+        header p { margin: 5px 0 0; color: #d7ccc8; }
+        .container { display: flex; flex-wrap: wrap; max-width: 1200px; margin: 20px auto; padding: 0 15px; gap: 20px; }
+        .products { flex: 2; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .product-card { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; display: flex; flex-direction: column; justify-content: space-between;}
+        .product-card .img-placeholder { width: 100%; height: 180px; background-color: #e0d4c8; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: #5d4037; font-weight: bold; border: 1px dashed #5d4037; }
+        .product-card h3 { font-size: 1.1rem; color: #4e342e; margin-bottom: 5px; }
+        .product-card p.desc { font-size: 0.9rem; color: #757575; min-height: 40px; margin-top: 0;}
+        .product-card p.price { font-size: 1.3rem; font-weight: bold; color: #2e7d32; margin: 10px 0; }
+        .product-card button { background-color: #5d4037; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; transition: background 0.3s; }
+        .product-card button:hover { background-color: #3e2723; }
+        .cart-section { flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; height: fit-content; position: sticky; top: 20px; }
+        .cart-section h2 { margin-top: 0; color: #3e2723; border-bottom: 2px solid #efebe9; padding-bottom: 10px; }
+        .cart-items { list-style: none; padding: 0; margin: 0 0 20px 0; }
+        .cart-items li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; align-items: center;}
+        .cart-total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-bottom: 20px; }
+        .btn-whatsapp { background-color: #25d366; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1rem; font-weight: bold; }
+        .btn-whatsapp:hover { background-color: #1ebe57; }
+        .remove-btn { color: white; background: #d32f2f; border: none; border-radius: 3px; cursor: pointer; font-size: 0.8rem; padding: 2px 6px; margin-left: 10px;}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ARTESANO & CIA</h1>
+        <p>Arte em Madeira - Catálogo de Vendas 2026</p>
+    </header>
+
+    <div class="container">
+        <div class="products" id="product-list">
+            <!-- Produtos renderizados via JS -->
+        </div>
+
+        <div class="cart-section">
+            <h2>Seu Pedido</h2>
+            <ul class="cart-items" id="cart-items">
+                <li>Seu carrinho está vazio.</li>
+            </ul>
+            <div class="cart-total" id="cart-total">Total: R$ 0,00</div>
+            <button class="btn-whatsapp" onclick="enviarWhatsApp()">Enviar Pedido p/ WhatsApp</button>
+        </div>
+    </div>
+
+    <script>
+        const produtos = [
+            { id: 1, nome: "Kit 3 Peças (Cedro Rosa)", desc: "Faca, Garfo e Chaira na caixa de madeira.", preco: 350.00 },
+            { id: 2, nome: "Kit 2 Peças (Cedro Rosa)", desc: "Faca e Chaira na caixa de madeira.", preco: 280.00 },
+            { id: 3, nome: "Caixa Individual", desc: "Estojo individual para 1 faca.", preco: 180.00 },
+            { id: 4, nome: "Kit Trino Premium", desc: "Faca 9, Garfo 9, Chaira 9 + Bainha couro.", preco: 320.00 },
+            { id: 5, nome: "Kit Dueto Premium", desc: "Faca 9 + Chaira 9 + Bainha couro.", preco: 250.00 },
+            { id: 6, nome: "Faca Inox 9 Estilo Europa", desc: "Bainha em couro estilo europa.", preco: 150.00 },
+            { id: 7, nome: "Cutelo Inox", desc: "Cabo alumínio e bainha em couro.", preco: 130.00 },
+            { id: 8, nome: "Canivete Rústico", desc: "Cabo madeira/acrílico c/ bainha.", preco: 60.00 },
+            { id: 9, nome: "Corote Amburana 1L", desc: "Reserva pessoal para envelhecimento.", preco: 210.00 },
+            { id: 10, nome: "Corote Amburana 3L", desc: "Reserva pessoal para envelhecimento.", preco: 298.00 },
+            { id: 11, nome: "Corote Amburana 5L", desc: "Reserva pessoal para envelhecimento.", preco: 389.00 },
+            { id: 12, nome: "Tábua Country c/ Faca", desc: "Tábua mista com rebaixo (53x28x2cm).", preco: 250.00 }
+        ];
+
+        let carrinho = [];
+
+        function renderizarProdutos() {
+            const lista = document.getElementById("product-list");
+            lista.innerHTML = "";
+            produtos.forEach(p => {
+                lista.innerHTML += `
+                    <div class="product-card">
+                        <div class="img-placeholder">COLOCAR FOTO AQUI</div>
+                        <div>
+                            <h3>${p.nome}</h3>
+                            <p class="desc">${p.desc}</p>
+                        </div>
+                        <div>
+                            <p class="price">R$ ${p.preco.toFixed(2).replace('.', ',')}</p>
+                            <button onclick="adicionarAoCarrinho(${p.id}, '${p.nome}', ${p.preco})">Adicionar</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function adicionarAoCarrinho(id, nome, preco) {
+            const itemExistente = carrinho.find(i => i.id === id);
+            if (itemExistente) {
+                itemExistente.qtde++;
+            } else {
+                carrinho.push({ id, nome, preco, qtde: 1 });
+            }
+            atualizarCarrinho();
+        }
+
+        function removerDoCarrinho(id) {
+            carrinho = carrinho.filter(i => i.id !== id);
+            atualizarCarrinho();
+        }
+
+        function atualizarCarrinho() {
+            const lista = document.getElementById("cart-items");
+            const totalDisplay = document.getElementById("cart-total");
+            lista.innerHTML = "";
+            
+            let total = 0;
+            
+            if (carrinho.length === 0) {
+                lista.innerHTML = "<li>Seu carrinho está vazio.</li>";
+            } else {
+                carrinho.forEach(item => {
+                    const subtotal = item.preco * item.qtde;
+                    total += subtotal;
+                    lista.innerHTML += `
+                        <li>
+                            <span>${item.qtde}x ${item.nome}</span>
+                            <span>R$ ${subtotal.toFixed(2).replace('.', ',')} <button class="remove-btn" onclick="removerDoCarrinho(${item.id})">X</button></span>
+                        </li>
+                    `;
+                });
+            }
+            
+            totalDisplay.innerText = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function enviarWhatsApp() {
+            if (carrinho.length === 0) {
+                alert("Seu carrinho está vazio! Adicione produtos antes de finalizar.");
+                return;
+            }
+
+            let texto = "Olá Geismar! Gostaria de fazer o seguinte pedido da Artesano & Cia:%0A%0A";
+            let total = 0;
+
+            carrinho.forEach(item => {
+                const subtotal = item.preco * item.qtde;
+                total += subtotal;
+                texto += `- ${item.qtde}x ${item.nome} (R$ ${subtotal.toFixed(2).replace('.', ',')})%0A`;
+            });
+
+            texto += `%0A*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
+
+            const telefone = "5517981712129"; 
+            const url = "https://wa.me/" + telefone + "?text=" + texto;
+            
+            window.open(url, "_blank");
+        }
+
+        renderizarProdutos();
+    </script>
+</body>
+</html>
